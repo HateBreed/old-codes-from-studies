@@ -1,0 +1,143 @@
+Readme for FTP client
+Home examination for Network Programming course
+Author: Jussi Laakkonen / 
+
+Task:
+
+To implement a FTP client based on RFC 959 with some basic functionalities.
+
+
+Files:
+
+	definitions.h	- Definitions file, includings, parameter and enum definitions.
+	
+	fileoper.c	- File operations, with "interface" to use them depending on the mode
+	fileoper.h	- Header file for file operations
+	
+	ftpclient.c	- The main file, connections, transfers and program state changes 
+	ftpclient.h 	- Header file for main file
+	
+	genoper.c	- Generic operations (parsing, port creation, help messags)
+	genoper.h	- Header file for generic operations
+	
+	Makefile	- the makefile
+	
+
+Building the code:
+
+
+	make or
+	make build
+		
+	- Builds the code, results a ftpclient -executable
+	
+	
+Building debug:
+	
+	make debug
+		
+	- Builds the code for gdb (with -g flag)
+
+
+Removing executable:
+
+	make clean or
+	make remove
+	
+	- Removes ftpclient -executable
+	
+
+Usage:
+
+	For usage help and commands, use ./ftpclient --help or "help" command in program.
+	
+	Program can be ran with or without parameters, server address can be either hostname or IP-address.
+	
+	With parameters, order can be changed (if invalid, help will be shown):
+	
+		./ftpclient -p <port> -h <address>
+			<port> 		- port number
+			<address>	- address of the ftp server
+
+		- Connection can be opened with command "open" without parameters.
+			
+	without parameters:
+		
+		./ftpclient
+		
+		- When opening connection, server address and port must be given:
+			open <address>:<port>
+	
+
+Other info:
+
+	All required methods and commands are implemented.
+
+	Client supports both passive and active mode in data transfer. In active mode client creates the port
+	with pseudo random number generator (some free port between 5000 and 65000).
+	
+	Data can be transferred in ASCII or BINARY mode, both use stream mode as transmission mode. In ASCII
+	newline markers are replaced with carriage return + newline marker. Data is read from file in blocks,
+	size defined by DATASIZE compile time variable. In ASCII mode text is read line by line or if the line
+	is longer than DATASIZE it will be read in blocks.
+	
+	If file cannot be found when sending a file, user is informed and transfer doesn't start. When file is
+	downloaded from server client truncates the file to zero if it exists or creates new (read-write-execute
+	permissions to user) file, if file cannot be written user is informed and transfer doesn't start.
+	
+	When transferring the data client doesn't do anything else during the transfer, i.e. control connection
+	will not be listened until data transfer is completed. 
+	
+	The client is controlled by state machine consisting different states for connection, transfer, command,
+	file transfer, directory listing and transfer modes.
+	
+	Client can connect to other ftp servers with command "open <address>:<port>" after connection to previous
+	one is closed, see command list (with ./ftpclient --help).
+	
+	The transfer mode changes always to ASCII when directory list is retrieved, before transferring binary files
+	user must change the mode to BINARY (with command "binary").
+	
+	
+Compile time parameters:
+
+	All in definitions.h:
+	
+		PARAMS		- Parameter count (5)
+
+		BUFSIZE		- Buffer size - input (1024)
+		DATASIZE	- Size of data block (128)
+		
+		OPENING_DATA	- FTP reply 150
+		CMD_OK		- FTP reply 200
+		SERVICE_READY	- FTP reply 220
+		BYE		- FTP reply 221
+		TRANSFER_COMPL	- FTP reply 226
+		PASSIVE_MODE	- FTP reply 227
+		LOGGED_IN	- FTP reply 230
+		FILE_ACT_OK	- FTP reply 250
+		PASS_REQ	- FTP reply 331
+		CLOSING		- FTP reply 421
+		SYNTAX_ERR	- FTP reply 500
+		LOGIN_ERROR	- FTP reply 530
+		ACTION_FAIL	- FTP reply 550
+		
+
+Sources used as help:
+
+
+	RFC959 - FTP protocol description
+	
+	Own previous excercise works (mainly ex3)
+	
+	Linux man pages
+	
+	Beej's Guide to Network Programming
+		http://beej.us/guide/bgnet/
+	
+	The World of select()
+		http://www.lowtek.com/sockets/select.html
+		
+		
+	-----------------------------
+	- Jussi Laakkonen 17.2.2008 -
+	-----------------------------

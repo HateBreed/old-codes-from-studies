@@ -1,0 +1,111 @@
+Readme for TFTP client
+Fourth exercise for Network Programming course
+Author:	Jussi Laakkonen / 
+
+Task:
+
+To implement a TFTP client according to RFC 1350. Client supports uploading and downloading of files.
+
+Files:
+
+	client.c - Client code, sending and receiving packets.
+	client.h - Header file of client.c - includes generic operations (genoper.h).
+
+	genoper.c - Generic operations, adding blocks to linked list, clearing list, file write/read operations.
+	genoper.h - Header file of genoper.c - includes structures and encoding & decoding functions (structures.h)
+
+	structures.c - Encoding and decoding of messages
+	structures.h - Header file of structures.c, contains packet structures - includes definitions.h and errors.h
+
+	errors.c - Error message printing, provides functions for error messages (and quit) and parameter errors. 
+	errors.h - Header file of errors.c.
+	
+	definitions.h - The definitions file, generic includes and compile-time parameter definitions
+	
+	Makefile - The makefile.
+	
+
+Building the code:
+
+	make (or make build)
+	
+	Builds the program with gcc using -Wall flag. Results client-executable file.
+
+
+Usage:
+
+	Upload:
+	
+		./client <hostname> <port> upload <filename>
+		<hostname>	- The hostname of the server
+		<port>		- The port used by client
+		<filename>	- File to be uploaded
+
+	Download:
+	
+		./client <hostname> <port> download <filename>
+		<hostname>	- The hostname of the server
+		<port>		- The port used by client
+		<filename>	- File to be uploaded
+
+	If program detects that given parameters are incorrect, usage help will be printed.
+	Client uses the default port of TFTP server (69) when connecting to server in the beginning.
+
+
+Other info:
+
+	Packets are decoded and encoded by using cast, it might not be the best way to do it but it seems to work 
+	(at least in CURL TFTP implementation it was used, I got the idea from there). I tried using similar methods
+	presented at Beej's Guide to Network Programming but I didn't get it working with those ideas.
+
+	The "packet" is sent as a void pointer (char pointer cast to void pointer) and received also in similar 
+	fashion. The actual packet is got by casting received packet to structure pointer.
+
+	Select is used to detect packets in socket and retransmission is also supported in both modes (upload and
+	download).
+
+	The timeout values can be changed by modifying values of TIMEOUT_SEC and TIMEOUT_USEC in definitions.h file.
+
+	When writing to a file the file is created (previous overwritten) and read-write-execute rights	are given to 
+	the user running the program.
+
+
+Compile time options:
+
+	In client.h
+		PARAMS - amount of parameters needed for client.
+
+	In definitions.h 
+		OPCODE_RRQ 	- TFTP read request code
+		OPCODE_WRQ 	- TFTP write request code
+		OPCODE_DATA 	- TFTP data code
+		OPCODE_ACK 	- TFTP ack code
+		OPCODE_ERROR 	- TFTP error code
+		TFTP_BLOCK 	- Size of TFTP datablock
+		MAX_MSG 	- Maximum length of message
+		TIMEOUT_SEC 	- Timeout length in seconds
+		TIMEOUT_USEC	- Timeout length in micro seconds
+		TFTP_SERVER_PORT- Port of TFTP server
+
+
+Sources used as help:
+
+	Beej's Guide to Network Programming
+		http://beej.us/guide/bgnet/
+
+	Sockets tutorial
+		http://www.cs.rpi.edu/courses/sysprog/sockets/sock.html
+
+	The World of select()
+		http://www.lowtek.com/sockets/select.html
+
+	I also looked at the source code of the TFTP implementation in CURL library.
+		http://curl.haxx.se/
+		The code can be also found with codesearch.google.com with "curl tftp lang:c"
+
+	And of course linux man pages.
+
+
+	------------------------------
+	- Jussi Laakkonen 2.12.2007  -
+	------------------------------
